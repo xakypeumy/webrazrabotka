@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Генератор паролей</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <form method="POST" class="container">
+        <h1>Генератор паролей</h1>
+
+        <div class="form-group">
+            <label for="pwd_length">Длина пароля:</label>
+            <input type="number" id="pwd_length" name="pwd_length" value="{{ pwd_length }}" min="4" max="128" required>
+        </div>
+
+        <div class="form-group">
+            <label>Используемые символы:</label>
+            <div class="checkbox-group">
+                <div class="checkbox-item">
+                    <input type="checkbox" id="pwd_digits" name="pwd_digits" {{ pwd_digits_checked }}>
+                    <label for="pwd_digits">Цифры (0-9)</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="pwd_lowercase" name="pwd_lowercase" {{ pwd_lowercase_checked }}>
+                    <label for="pwd_lowercase">Строчные буквы (a-z)</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="pwd_uppercase" name="pwd_uppercase" {{ pwd_uppercase_checked }}>
+                    <label for="pwd_uppercase">Заглавные буквы (A-Z)</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="pwd_punctuation" name="pwd_punctuation" {{ pwd_punctuation_checked }}>
+                    <label for="pwd_punctuation">Спецсимволы (!@#$% и т.д.)</label>
+                </div>
+            </div>
+        </div>
+
+        <button type="submit">Сгенерировать пароль</button>
+    </form>
+
+    {% if password %}
+    <div class="result">
+        <strong>Ваш пароль:</strong>
+        <div class="password-display">{{ password }}</div>
+        <div class="result-actions"></div>
+    </div>
+    {% endif %}
+
+    {% if error %}
+    <div class="error">
+        {{ error }}
+    </div>
+    {% endif %}
+
+</body>
+</html>
