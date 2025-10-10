@@ -1,14 +1,64 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, redirect, url_for, session, flash
 import random
 import string
 
 app = Flask(__name__)
+app.secret_key = 'your-secret-key-123'
 
 digits = '0123456789'
 uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
 lowercase = 'abcdefghijklmnopqrstuvwxyz'
 punctuation = '!@#$%^&*()_+-=[]{};:,<.>/?'
 ally = digits + uppercase + lowercase + punctuation
+
+def load_users():
+    return [
+            {'username': 'admin', 'password': 'admin', 'role': 'admin'},
+            {'username': 'user', 'password': 'user', 'role': 'user'}
+        ]
+
+def login_required(f):
+    def decorated_function(*args, **kwargs):
+        if 'username' not in session:
+            flash('Пожалуйста, войдите в систему', 'error')
+            return redirect(url_for('login'))
+        return f(*args, **kwargs)
+
+    decorated_function.__name__ = f.__name__
+    return decorated_function
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if 'username' in session:
+        return redirect(url_for('index'))
+
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+
+        users = load_users()
+        user_found = False
+        for user in users:
+            if user['username'] == username and user['password'] == password:
+                session['username'] = user['username']
+                session['role'] = user.get('role', 'user')
+                print(session)
+                flash(f'Добро пожаловать, {username}!', 'success')
+                user_found = True
+                return redirect(url_for('index'))
+
+        if not user_found:
+            flash('Неверное имя пользователя или пароль', 'error')
+
+    return render_template('login.html')
+
+
+@app.route('/logout')
+def logout():
+    session.clear()
+    flash('Вы вышли из системы', 'info')
+    return redirect(url_for('login'))
+
 
 def generate_password(pwd_length, pwd_digits, pwd_uppercase, pwd_lowercase, pwd_punctuation):
     password = ''
@@ -26,6 +76,7 @@ def generate_password(pwd_length, pwd_digits, pwd_uppercase, pwd_lowercase, pwd_
     return password
 
 @app.route('/', methods=['GET', 'POST'])
+@login_required
 def index():
     password = ''
     error = None
@@ -45,14 +96,6 @@ def index():
             pwd_uppercase = 'pwd_uppercase' in request.form
             pwd_lowercase = 'pwd_lowercase' in request.form
             pwd_punctuation = 'pwd_punctuation' in request.form
-
-            current_values.update({
-                'pwd_length': str(pwd_length),
-                'pwd_digits': pwd_digits,
-                'pwd_uppercase': pwd_uppercase,
-                'pwd_lowercase': pwd_lowercase,
-                'pwd_punctuation': pwd_punctuation
-            })
 
             password=generate_password(pwd_length, pwd_digits, pwd_uppercase, pwd_lowercase, pwd_punctuation)
 
