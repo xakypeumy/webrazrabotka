@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Вход</title>
+    <title>Регистрация</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
     <div class="form-container">
-        <h2>Вход в систему</h2>
+        <h2>Регистрация</h2>
 
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
@@ -19,11 +19,15 @@
         <form method="POST">
             <input type="text" name="username" placeholder="Имя пользователя" required>
             <input type="password" name="password" placeholder="Пароль" required>
-            <button type="submit" class="btn login-btn">Войти</button>
+            <select name="role">
+                <option value="user">Пользователь</option>
+                <option value="admin">Администратор</option>
+            </select>
+            <button type="submit" class="btn register-btn">Зарегистрироваться</button>
         </form>
 
-        <form action="{{ url_for('register') }}" method="GET">
-            <button type="submit" class="btn register-btn">Зарегистрироваться</button>
+        <form action="{{ url_for('login') }}" method="GET">
+            <button type="submit" class="btn login-btn">Войти</button>
         </form>
     </div>
 </body>
