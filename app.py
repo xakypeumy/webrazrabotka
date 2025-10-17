@@ -6,13 +6,6 @@ import os
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
 
-digits = '0123456789'
-uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
-lowercase = 'abcdefghijklmnopqrstuvwxyz'
-punctuation = '!@#$%^&*()_+-=[]{};:,<.>/?'
-ally = digits + uppercase + lowercase + punctuation
-
-
 def load_users():
     users_list = []
     try:
@@ -64,6 +57,46 @@ def login_required(f):
     decorated_function.__name__ = f.__name__
     return decorated_function
 
+def add_pass_to_file(site, log, pas):
+    try:
+        with open('passwords.txt', 'a', encoding='utf-8') as file:
+            file.write(site + ' ' + log + ' ' + pas + '\n')
+        return True
+    except Exception as e:
+        print(f"Ошибка при записи в файл: {e}")
+        return False
+
+def read_pass_from_file():
+    passwords = []
+    try:
+        with open('passwords.txt', 'r', encoding='utf-8') as file:
+            for line in file:
+                line = line.strip()
+                if line:
+                    passwords.append(line)
+    except FileNotFoundError:
+        passwords = ["Файл passwords.txt не найден"]
+    except Exception as e:
+        passwords = [f"Ошибка при чтении файла: {str(e)}"]
+
+    return passwords
+
+@app.route('/', methods=['GET', 'POST'])
+@login_required
+def index():
+    passwords = read_pass_from_file()
+    if request.method == 'POST':
+        site = request.form['site']
+        log = request.form['log']
+        pas = request.form['pas']
+
+        add_pass_to_file(site, log, pas)
+
+    return render_template('index.html',
+                           passwords=passwords,
+                           )
+
+
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
@@ -111,54 +144,6 @@ def logout():
     session.clear()
     flash('Вы вышли из системы', 'info')
     return redirect(url_for('login'))
-
-
-def generate_password(pwd_length, pwd_digits, pwd_uppercase, pwd_lowercase, pwd_punctuation):
-    password = ''
-    chars = ''
-    if pwd_digits:
-        chars += string.digits
-    if pwd_uppercase:
-        chars += string.ascii_uppercase
-    if pwd_lowercase:
-        chars += string.ascii_lowercase
-    if pwd_punctuation:
-        chars += string.punctuation
-
-    password = ''.join(random.choice(chars) for _ in range(pwd_length))
-    return password
-
-@app.route('/', methods=['GET', 'POST'])
-@login_required
-def index():
-    password = ''
-    error = None
-
-    current_values = {
-        'pwd_length': '4',
-        'pwd_digits': True,
-        'pwd_uppercase': True,
-        'pwd_lowercase': True,
-        'pwd_punctuation': True
-    }
-
-    if request.method == 'POST':
-        try:
-            pwd_length = int(request.form.get('pwd_length', 4))
-            pwd_digits = 'pwd_digits' in request.form
-            pwd_uppercase = 'pwd_uppercase' in request.form
-            pwd_lowercase = 'pwd_lowercase' in request.form
-            pwd_punctuation = 'pwd_punctuation' in request.form
-
-            password=generate_password(pwd_length, pwd_digits, pwd_uppercase, pwd_lowercase, pwd_punctuation)
-
-        except Exception as e:
-            error = f'Ошибка: {str(e)}'
-
-    return render_template('index.html',
-                           password=password,
-                           error=error,
-                           **current_values)
 
 if __name__ == '__main__':
     app.run(debug=True)
