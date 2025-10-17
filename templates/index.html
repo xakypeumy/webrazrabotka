@@ -3,56 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Генератор паролей</title>
+    <title>Менеджер паролей</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <form method="POST" class="container">
-        <h1>Генератор паролей</h1>
+    <div>
 
-        <div class="form-group">
-            <label for="pwd_length">Длина пароля:</label>
-            <input type="number" id="pwd_length" name="pwd_length" value="{{ pwd_length }}" min="4" max="128" required>
-        </div>
+        <form method="POST" class="container">
+            <h2>Ввести данные</h2>
 
-        <div class="form-group">
-            <label>Используемые символы:</label>
-            <div class="checkbox-group">
-                <div class="checkbox-item">
-                    <input type="checkbox" id="pwd_digits" name="pwd_digits" {{ pwd_digits_checked }}>
-                    <label for="pwd_digits">Цифры</label>
-                </div>
-                <div class="checkbox-item">
-                    <input type="checkbox" id="pwd_lowercase" name="pwd_lowercase" {{ pwd_lowercase_checked }}>
-                    <label for="pwd_lowercase">Строчные буквы</label>
-                </div>
-                <div class="checkbox-item">
-                    <input type="checkbox" id="pwd_uppercase" name="pwd_uppercase" {{ pwd_uppercase_checked }}>
-                    <label for="pwd_uppercase">Заглавные буквы</label>
-                </div>
-                <div class="checkbox-item">
-                    <input type="checkbox" id="pwd_punctuation" name="pwd_punctuation" {{ pwd_punctuation_checked }}>
-                    <label for="pwd_punctuation">Спецсимволы</label>
-                </div>
+            <input type="text" name="site" placeholder="Название сайта" required>
+            <input type="text" name="log" placeholder="Логин" required>
+            <input type="text" name="pas" placeholder="Пароль" required>
+
+            <button type="submit" class="btn save-passwords">Сохранить</button>
+        </form>
+
+        <h2>Пароли</h2>>
+
+        {% if passwords %}
+            <div class="passwords-list">
+                {% for passwords in passwords %}
+                    <div class="password-item">
+                        <span class="password-number">{{ loop.index }}</span>
+                        <span class="site-log-pas">{{ passwords }}</span>
+                    </div>
+                {% endfor %}
             </div>
-        </div>
+        {% else %}
 
-        <button type="submit">Сгенерировать пароль</button>
-    </form>
+            <p class="no-passwords">Пароли не найдены</p>
 
-    {% if password %}
-    <div class="result">
-        <strong>Ваш пароль:</strong>
-        <div class="password-display">{{ password }}</div>
-        <div class="result-actions"></div>
-    </div>
-    {% endif %}
-
-    {% if error %}
-    <div class="error">
-        {{ error }}
-    </div>
-    {% endif %}
-
+        {% endif %}
 </body>
 </html>
