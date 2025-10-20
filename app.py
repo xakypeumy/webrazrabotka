@@ -1,10 +1,31 @@
-from flask import Flask, render_template, request, redirect, url_for, session, flash
+from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
 import random
 import string
 import os
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
+
+digits = '0123456789'
+uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+lowercase = 'abcdefghijklmnopqrstuvwxyz'
+punctuation = '!@#$%^&*()_+-=[]{};:,<.>/?'
+ally = digits + uppercase + lowercase + punctuation
+
+def generate_password(pwd_length, pwd_digits, pwd_uppercase, pwd_lowercase, pwd_punctuation):
+    password = ''
+    chars = ''
+    if pwd_digits:
+        chars += string.digits
+    if pwd_uppercase:
+        chars += string.ascii_uppercase
+    if pwd_lowercase:
+        chars += string.ascii_lowercase
+    if pwd_punctuation:
+        chars += string.punctuation
+
+    password = ''.join(random.choice(chars) for _ in range(pwd_length))
+    return password
 
 def load_users():
     users_list = []
@@ -81,6 +102,11 @@ def read_pass_from_file():
 
     return passwords
 
+@app.route('/generate-password')
+def generate_password_route():
+    password = generate_password(12,True,True,True)
+    return jsonify({'password': password})
+
 @app.route('/', methods=['GET', 'POST'])
 @login_required
 def index():
@@ -91,6 +117,7 @@ def index():
         pas = request.form['pas']
 
         add_pass_to_file(site, log, pas)
+        return redirect(url_for('index'))
 
     return render_template('index.html',
                            passwords=passwords,
@@ -146,4 +173,4 @@ def logout():
     return redirect(url_for('login'))
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, host='0.0.0.0', port=5000)
