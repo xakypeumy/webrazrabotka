@@ -7,33 +7,50 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <div>
+    <div class="container">
+        <form method="POST">
+        <h2>Сохранить пароли</h2>
+            
+            <div class="input-group">
+                <input type="text" name="site" placeholder="Название сайта" required>
+            </div>
+            
+            <div class="input-group">
+                <input type="text" name="log" placeholder="Логин" required>
+            </div>
+            
+            <div class="input-group">
+                <input type="text" name="pas" placeholder="Пароль" required>
+                <button type="button" class="btn generate-passwords" onclick="generate_password()">
+                    Сгенерировать
+                </button>
+            </div>
 
-        <form method="POST" class="container">
-            <h2>Ввести данные</h2>
-
-            <input type="text" name="site" placeholder="Название сайта" required>
-            <input type="text" name="log" placeholder="Логин" required>
-            <input type="text" name="pas" placeholder="Пароль" required>
-
-            <button type="submit" class="btn save-passwords">Сохранить</button>
+            <button type="submit" class="btn save-passwords">Сохранить пароль</button>
         </form>
+    </div>
 
-        <h2>Пароли</h2>>
+    <div class="passwords-section">
+        <h2>Сохранённые пароли</h2>
 
         {% if passwords %}
             <div class="passwords-list">
-                {% for passwords in passwords %}
+                {% for password in passwords %}
                     <div class="password-item">
                         <span class="password-number">{{ loop.index }}</span>
-                        <span class="site-log-pas">{{ passwords }}</span>
+                        <span class="site-log-pas">{{ password }}</span>
                     </div>
                 {% endfor %}
             </div>
         {% else %}
-
             <p class="no-passwords">Пароли не найдены</p>
-
         {% endif %}
+    </div>
+
+    <footer class="footer">
+        <div style="text-align: center: color: #666; font-size:12px; margin-top:30px;">
+            &copy; Потапов Р.В ИСП 31 2025
+        </div>
+    </footer>
 </body>
 </html>
